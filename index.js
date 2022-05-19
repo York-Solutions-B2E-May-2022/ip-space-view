@@ -1,6 +1,6 @@
-async function fetchIP(_fetch = fetch) {
+async function runFetch(url, _fetch = fetch) {
     try {
-        const response = await _fetch('https://www.api.ipify.org?format=json');
+        const response = await _fetch(url);
         if (!response.ok) {
             return 'response not ok'
         }
@@ -8,12 +8,30 @@ async function fetchIP(_fetch = fetch) {
         const json = await response.json();
         return json;
     } catch (error) {
-        console.log(error.message);
         return 'response not found'
     }
 }
 
-async function test_fetchIP_not_ok() {
+async function getIp() {
+    const data = await runFetch('https://api.ipify.org/?format=json');
+    return data?.ip;
+
+}
+
+async function getLocation(ip) {
+    return await runFetch(`https://www.ipinfo.io/${ip}?token=4cca1d0904433e`);
+}
+
+
+async function renderLocation() {
+    const ip = await getIp();
+    const location = await getLocation(ip);
+    console.log(location);
+}
+
+renderLocation()
+
+async function test_runFetch_not_ok() {
     // arrange
     const expected = 'response not ok'
     const _fetch = async () => {
@@ -23,16 +41,17 @@ async function test_fetchIP_not_ok() {
     }
 
     // act
-    const result = await fetchIP(_fetch)
+    const result = await runFetch('', _fetch)
 
     // assert
     if (result !== expected) {
-        console.log('test_fetchIP_not_ok - failed')
+        console.log('test_runFetch_not_ok - failed')
     } else {
-        console.log('test_fetchIP_not_ok - passed')
+        console.log('test_runFetch_not_ok - passed')
     }
 }
-async function test_fetchIP_ok() {
+
+async function test_runFetch_ok() {
     // arrange
     const expected = true;
     const _fetch = async () => {
@@ -44,15 +63,16 @@ async function test_fetchIP_ok() {
         }
     }
 
-    const result = await fetchIP(_fetch);
+    const result = await runFetch('', _fetch);
 
     if (result !== expected) {
-        console.log('test_fetchIP_ok - failed')
+        console.log('test_runFetch_ok - failed')
     } else {
-        console.log('test_fetchIP_ok - passed')
+        console.log('test_runFetch_ok - passed')
     }
 }
-async function test_fetchIP_failed() {
+
+async function test_runFetch_failed() {
     const expected = 'response not found';
     // const _fetch = () => {
     //     return new Promise((resolve, reject) =>{
@@ -61,18 +81,18 @@ async function test_fetchIP_failed() {
     // }
 
     const _fetch = async () => {
-        throw new Error('fake-error')
+        throw false
     }
 
-    const result = await fetchIP(_fetch);
+    const result = await runFetch('', _fetch);
 
     if (result !== expected) {
-        console.log('test_fetchIP_failed - failed')
+        console.log('test_runFetch_failed - failed')
     } else {
-        console.log('test_fetchIP_failed - passed')
+        console.log('test_runFetch_failed - passed')
     }
 }
 
-test_fetchIP_not_ok()
-test_fetchIP_ok()
-test_fetchIP_failed()
+test_runFetch_not_ok()
+test_runFetch_ok()
+test_runFetch_failed()
