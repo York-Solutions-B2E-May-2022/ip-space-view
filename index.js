@@ -5,10 +5,69 @@ async function runFetch(url, _fetch = fetch) {
             return 'response not ok'
         }
 
-        const json = await response.json();
-        return json;
+        return await response.json();
     } catch (error) {
         return 'response not found'
+    }
+}
+
+async function test_runFetch_not_ok() {
+    // arrange
+    const expected = 'response not ok'
+    const _fetch = async () => {
+        return {
+            ok: false
+        }
+    }
+
+    // act
+    const result = await runFetch('', _fetch)
+
+    // assert
+    if (result !== expected) {
+        console.log('test_runFetch_not_ok - failed')
+    } else {
+        console.log('test_runFetch_not_ok - passed')
+    }
+}
+async function test_runFetch_ok() {
+    // arrange
+    const expected = true;
+    const _fetch = async () => {
+        return {
+            ok: true,
+            json: async () => {
+                return true;
+            }
+        }
+    }
+
+    const result = await runFetch('', _fetch);
+
+    if (result !== expected) {
+        console.log('test_runFetch_ok - failed')
+    } else {
+        console.log('test_runFetch_ok - passed')
+    }
+}
+async function test_runFetch_failed() {
+    const expected = 'response not found';
+    // const _fetch = () => {
+    //     return new Promise((resolve, reject) =>{
+    //         reject('fake-error')
+    //     })
+    // }
+
+    const _fetch = async () => {
+        throw false
+    }
+
+    const result = await runFetch('', _fetch);
+
+    if (result !== expected) {
+        console.log('test_runFetch_failed - failed')
+    } else {
+        console.log('test_runFetch_failed - passed')
     }
 }
 
@@ -35,12 +94,55 @@ async function test_getIpProp_should_return_value_for_ip_prop() {
 }
 
 function createHtmlString(location) {
-    let str = ''
-    for (let key in location) {
-        str += location[key] + '<br>';
+    return `
+        <div>
+            <p class="item">Country: <span class="value-text">${location.country}</span></p>
+            <p>IP: ${location.ip}</p>
+            <p>GPS: ${location.loc}</p>
+            <p>ISP: ${location.org}</p>
+            <p>Zipcode: ${location.postal}</p>
+            <p>State: ${location.region}</p>
+            <p>City: ${location.city}</p>
+            <p>Timezone: ${location.timezone}</p>
+        </div>
+    `;
+}
+
+function test_createHtmlString_should_format_string_from_obj() {
+    //arrange
+    const expected = `
+        <div>
+            <p class="item">Country: <span class="value-text">country</span></p>
+            <p>IP: ip</p>
+            <p>GPS: loc</p>
+            <p>ISP: org</p>
+            <p>Zipcode: postal</p>
+            <p>State: region</p>
+            <p>City: city</p>
+            <p>Timezone: timezone</p>
+        </div>
+    `;
+
+    const obj = {
+        country: 'country',
+        ip: 'ip',
+        loc: 'loc',
+        org: 'org',
+        postal: 'postal',
+        region: 'region',
+        city: 'city',
+        timezone: 'timezone'
     }
 
-    return str;
+    // act
+    const result = createHtmlString(obj);
+
+    // assert
+    if (result !== expected) {
+        console.log('test_createHtmlString_should_format_string_from_obj - failed')
+    } else {
+        console.log('test_createHtmlString_should_format_string_from_obj - passed')
+    }
 }
 
 async function renderLocation() {
@@ -58,71 +160,8 @@ async function renderLocation() {
 
 renderLocation()
 
-async function test_runFetch_not_ok() {
-    // arrange
-    const expected = 'response not ok'
-    const _fetch = async () => {
-        return {
-            ok: false
-        }
-    }
-
-    // act
-    const result = await runFetch('', _fetch)
-
-    // assert
-    if (result !== expected) {
-        console.log('test_runFetch_not_ok - failed')
-    } else {
-        console.log('test_runFetch_not_ok - passed')
-    }
-}
-
-async function test_runFetch_ok() {
-    // arrange
-    const expected = true;
-    const _fetch = async () => {
-        return {
-            ok: true,
-            json: async () => {
-                return true;
-            }
-        }
-    }
-
-    const result = await runFetch('', _fetch);
-
-    if (result !== expected) {
-        console.log('test_runFetch_ok - failed')
-    } else {
-        console.log('test_runFetch_ok - passed')
-    }
-}
-
-async function test_runFetch_failed() {
-    const expected = 'response not found';
-    // const _fetch = () => {
-    //     return new Promise((resolve, reject) =>{
-    //         reject('fake-error')
-    //     })
-    // }
-
-    const _fetch = async () => {
-        throw false
-    }
-
-    const result = await runFetch('', _fetch);
-
-    if (result !== expected) {
-        console.log('test_runFetch_failed - failed')
-    } else {
-        console.log('test_runFetch_failed - passed')
-    }
-}
-
-
-
 test_runFetch_not_ok()
 test_runFetch_ok()
 test_runFetch_failed()
 test_getIpProp_should_return_value_for_ip_prop()
+test_createHtmlString_should_format_string_from_obj()

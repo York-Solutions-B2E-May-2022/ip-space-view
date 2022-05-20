@@ -1,3 +1,13 @@
 body {
     background-color: ghostwhite;
 }
+
+.item {
+    font-weight: bold;
+}
+
+.value-text {
+    font-weight: normal;
+    color: red;
+    margin-left: 5rem;
+}
