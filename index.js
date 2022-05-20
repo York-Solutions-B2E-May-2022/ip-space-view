@@ -12,12 +12,8 @@ async function runFetch(url, _fetch = fetch) {
     }
 }
 
-async function getIpProp(data) {
-    if (data.ip) {
-        await writeLocation(data.ip)
-    } else {
-        writeError()
-    }
+function getIpProp(data) {
+    return data?.ip;
 }
 
 async function test_getIpProp_should_return_value_for_ip_prop() {
@@ -48,18 +44,16 @@ function createHtmlString(location) {
 }
 
 async function renderLocation() {
-    await getIpProp(
-        await runFetch('https://api.ipify.org/?format=jsons')
+    const ip = getIpProp(
+        await runFetch('https://api.ipify.org/?format=json')
     )
-}
 
-async function writeLocation(ip) {
-    const location = await runFetch(`https://www.ipinfo.io/${ip}?token=4cca1d0904433e`);
-    document.getElementById('location-container').innerHTML = createHtmlString(location);
-}
-
-function writeError() {
-    document.getElementById('location-container').innerHTML = 'your ip was not found';
+    if (ip) {
+        const location = await runFetch(`https://www.ipinfo.io/${ip}?token=4cca1d0904433e`);
+        document.getElementById('location-container').innerHTML = createHtmlString(location);
+    } else {
+        document.getElementById('location-container').innerHTML = 'unable to fund your ip'
+    }
 }
 
 renderLocation()
@@ -125,6 +119,7 @@ async function test_runFetch_failed() {
         console.log('test_runFetch_failed - passed')
     }
 }
+
 
 
 test_runFetch_not_ok()
