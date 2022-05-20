@@ -12,21 +12,54 @@ async function runFetch(url, _fetch = fetch) {
     }
 }
 
-async function getIp() {
-    const data = await runFetch('https://api.ipify.org/?format=json');
-    return data?.ip;
-
+async function getIpProp(data) {
+    if (data.ip) {
+        await writeLocation(data.ip)
+    } else {
+        writeError()
+    }
 }
 
-async function getLocation(ip) {
-    return await runFetch(`https://www.ipinfo.io/${ip}?token=4cca1d0904433e`);
+async function test_getIpProp_should_return_value_for_ip_prop() {
+    //arrange
+    const expect = true
+    const obj = {
+        ip: true
+    }
+
+    //act
+    const result = getIpProp(obj)
+
+    // assert
+    if (result !== expect) {
+        console.log('test_getIpProp_should_return_value_for_ip_prop - failed')
+    } else {
+        console.log('test_getIpProp_should_return_value_for_ip_prop - passed')
+    }
 }
 
+function createHtmlString(location) {
+    let str = ''
+    for (let key in location) {
+        str += location[key] + '<br>';
+    }
+
+    return str;
+}
 
 async function renderLocation() {
-    const ip = await getIp();
-    const location = await getLocation(ip);
-    console.log(location);
+    await getIpProp(
+        await runFetch('https://api.ipify.org/?format=jsons')
+    )
+}
+
+async function writeLocation(ip) {
+    const location = await runFetch(`https://www.ipinfo.io/${ip}?token=4cca1d0904433e`);
+    document.getElementById('location-container').innerHTML = createHtmlString(location);
+}
+
+function writeError() {
+    document.getElementById('location-container').innerHTML = 'your ip was not found';
 }
 
 renderLocation()
@@ -93,6 +126,8 @@ async function test_runFetch_failed() {
     }
 }
 
+
 test_runFetch_not_ok()
 test_runFetch_ok()
 test_runFetch_failed()
+test_getIpProp_should_return_value_for_ip_prop()
